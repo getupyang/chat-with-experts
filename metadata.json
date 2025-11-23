@@ -1,0 +1,5 @@
+{
+  "name": "Chat with Experts",
+  "description": "A roundtable debate simulator where AI experts discuss user topics.",
+  "requestFramePermissions": []
+}
