@@ -4,10 +4,47 @@ import { Expert, Message, Language } from "../types";
 import { debugLogger } from "../utils/debugLogger";
 
 // Define a prompt version constant for tracking changes in evaluations
-const PROMPT_VERSION = "v1.0.2_flash_retry";
+const PROMPT_VERSION = "v1.0.3_hybrid_env_retry";
 
-// Initialize the SDK with the environment variable.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// --- 1. Helper for Cross-Environment API Key ---
+const getApiKey = () => {
+  // 1. Try Vite (Vercel) environment variable
+  // @ts-ignore - ignore TS error for import.meta if types aren't perfect
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
+    // @ts-ignore
+    return import.meta.env.VITE_API_KEY;
+  }
+  // 2. Try Standard/Canvas environment variable
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    return process.env.API_KEY;
+  }
+  return "";
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() });
+
+// --- 2. Helper for Retries (Stability Shield) ---
+// Wraps any async operation with retry logic
+async function retryOperation<T>(
+  operation: () => Promise<T>, 
+  actionName: string, 
+  maxRetries: number = 2
+): Promise<T> {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        console.warn(`Attempt ${attempt + 1} failed for ${actionName}, retrying...`, error);
+        // Exponential backoff: 1s, 2s
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
 
 /**
  * Identifies and recruits experts based on the topic.
@@ -55,20 +92,24 @@ export const fetchExperts = async (topic: string, language: Language): Promise<E
     }
   };
 
+  // Wrap the actual API call with retry logic
   try {
-    const response = await ai.models.generateContent(config);
+    const responseText = await retryOperation(async () => {
+      const res = await ai.models.generateContent(config);
+      return res.text;
+    }, actionName);
     
     const latency = Date.now() - startTime;
-    debugLogger.log(actionName, PROMPT_VERSION, config, response.text, latency);
+    debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
 
-    const jsonStr = response.text || "[]";
+    const jsonStr = responseText || "[]";
     return JSON.parse(jsonStr) as Expert[];
 
   } catch (error) {
     const latency = Date.now() - startTime;
     debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(error) }, latency);
     
-    console.error("Failed to fetch experts:", error);
+    console.error("Failed to fetch experts after retries:", error);
     throw error;
   }
 };
@@ -120,12 +161,15 @@ export const fetchReplacementExpert = async (
   };
 
   try {
-    const response = await ai.models.generateContent(config);
+    const responseText = await retryOperation(async () => {
+       const res = await ai.models.generateContent(config);
+       return res.text;
+    }, actionName);
     
     const latency = Date.now() - startTime;
-    debugLogger.log(actionName, PROMPT_VERSION, config, response.text, latency);
+    debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
 
-    const jsonStr = response.text || "{}";
+    const jsonStr = responseText || "{}";
     return JSON.parse(jsonStr) as Expert;
 
   } catch (error) {
@@ -157,10 +201,8 @@ export const fetchDebateResponse = async (
       return `${h.expertName}: ${h.content}`;
   }).join("\n");
 
-  // Determine if this is the first turn (history usually has just 1 item: the user's prompt)
   const isFirstTurn = history.length <= 1;
 
-  // Dynamic instruction based on turn number
   let participationInstruction = "";
   if (isFirstTurn) {
       participationInstruction = `2. **Opening Round**: Since this is the beginning of the discussion, allow **ALL** experts to briefly introduce their stance or initial reaction to the user's topic.`;
@@ -201,8 +243,6 @@ export const fetchDebateResponse = async (
     Please continue the discussion.
   `;
 
-  // Using 'gemini-2.5-flash' instead of 'gemini-3-pro-preview' to avoid RPC/XHR errors (500)
-  // which are common with the heavier model in some proxy environments.
   const config = {
     model: 'gemini-2.5-flash',
     contents: fullPrompt,
@@ -212,32 +252,21 @@ export const fetchDebateResponse = async (
     }
   };
 
-  // Implement simple retry logic for robustness
-  const maxRetries = 2;
-  let lastError;
+  try {
+    const responseText = await retryOperation(async () => {
+       const res = await ai.models.generateContent(config);
+       return res.text;
+    }, actionName);
+    
+    const latency = Date.now() - startTime;
+    debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await ai.models.generateContent(config);
-      
-      const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, response.text, latency);
-  
-      return response.text || "";
-    } catch (error) {
-      lastError = error;
-      console.warn(`Attempt ${attempt + 1} failed for fetchDebateResponse`, error);
-      
-      // Wait before retrying (exponential backoff: 1000ms, 2000ms)
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
-      }
-    }
+    return responseText || "";
+  } catch (error) {
+    const latency = Date.now() - startTime;
+    debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(error) }, latency);
+    
+    console.error("Failed to generate debate after retries:", error);
+    throw error;
   }
-
-  const latency = Date.now() - startTime;
-  debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(lastError) }, latency);
-  
-  console.error("Failed to generate debate after retries:", lastError);
-  throw lastError;
 };
