@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { MessageSquare, Plus, BrainCircuit, X, Settings } from 'lucide-react';
 import { ChatSession, Language } from '../types';
 import { getTranslation } from '../utils/localization';
+import { AI_CONFIG } from '../services/geminiConfig';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -98,7 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         <div className="p-4 border-t border-gray-100 flex justify-between items-center flex-shrink-0 bg-gray-50/50">
-           <div className="text-xs text-gray-400 font-medium">© 2025 {t.appTitle}</div>
+           <div className="flex flex-col">
+             <div className="text-xs text-gray-400 font-medium">© 2025 {t.appTitle}</div>
+             <div className="text-[10px] text-gray-300 font-mono mt-0.5" title="Active Logic Strategy">
+               v0.2 • {AI_CONFIG.activeStrategyId}
+             </div>
+           </div>
            <div className="flex gap-2">
              <button 
                 onClick={onOpenSettings}
