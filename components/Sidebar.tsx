@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
            <div className="flex flex-col">
              <div className="text-xs text-gray-400 font-medium">© 2025 {t.appTitle}</div>
              <div className="text-[10px] text-gray-300 font-mono mt-0.5" title="Active Logic Strategy">
-               v0.2 • {AI_CONFIG.activeStrategyId}
+               v0.2.3 • {AI_CONFIG.activeStrategyId}
              </div>
            </div>
            <div className="flex gap-2">
@@ -119,4 +119,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </aside>
     </>
   );
-};
+}

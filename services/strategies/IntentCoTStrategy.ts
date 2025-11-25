@@ -6,11 +6,12 @@ import { ai, retryOperation } from "../geminiClient";
 import { DebateStrategy } from "./types";
 import { AI_CONFIG } from "../geminiConfig";
 import { LegacyStrategy } from "./LegacyStrategy";
+import { PROMPTS } from "../prompts";
 
 export class IntentCoTStrategy implements DebateStrategy {
   id = "v2_intent_cot";
   private config = AI_CONFIG.strategies["v2_intent_cot"];
-  // Fallback to legacy for expert selection for now, as the core innovation is in debate flow
+  // Fallback to legacy for expert selection
   private legacyStrategy = new LegacyStrategy();
 
   async fetchExperts(topic: string, language: Language): Promise<Expert[]> {
@@ -23,7 +24,6 @@ export class IntentCoTStrategy implements DebateStrategy {
 
   /**
    * Step 1: The "Director" Agent.
-   * Analyzes intent and writes a script/instruction for the actors.
    */
   private async analyzeIntentAndPlan(
     topic: string,
@@ -35,32 +35,12 @@ export class IntentCoTStrategy implements DebateStrategy {
     const actionName = 'v2_cot_planning';
     
     const expertNames = experts.map(e => e.name).join(", ");
-    const lastMessage = history[history.length - 1];
     const historyText = history.map(h => `${h.role === 'user' ? 'User' : h.expertName}: ${h.content}`).join("\n");
 
-    const planningPrompt = `
-      You are the **Director** of a high-level expert roundtable. 
-      
-      **Current Situation**:
-      Topic: "${topic}"
-      Experts: ${expertNames}
-      Language Context: ${language}
-      
-      **Dialogue History**:
-      ${historyText}
-
-      **Your Task**:
-      1. **Analyze the User**: What is the user's *real* underlying need? (e.g., they complained about "vague advice", so they actually need "concrete steps/tools").
-      2. **Critique Context**: Did the previous expert responses fail to hit the mark? Why?
-      3. **Direct the Show**: 
-         - Who should speak next? (Choose 1-2 experts).
-         - What specific angle or tone should they take? (e.g., "Be empathetic but firm", "Give a specific KPI example").
-      
-      Output valid JSON.
-    `;
+    const planningPrompt = PROMPTS.director_planning_v1(topic, expertNames, historyText, language);
 
     const config = {
-      model: this.config.planningModel, // Use fast model for reasoning
+      model: this.config.planningModel, 
       contents: planningPrompt,
       config: {
         responseMimeType: "application/json",
@@ -123,13 +103,13 @@ export class IntentCoTStrategy implements DebateStrategy {
   ): Promise<string> {
     const startTime = Date.now();
     const actionName = 'fetch_debate_response_v2_cot';
+    const PROMPT_VERSION = "v1.1_config_driven_cot";
     
-    // --- Phase 1: Planning (The "Thought" Process) ---
+    // --- Phase 1: Planning ---
     let plan = null;
-    // Always run CoT
     plan = await this.analyzeIntentAndPlan(topic, experts, history, language);
 
-    // --- Phase 2: Execution (The "Acting" Process) ---
+    // --- Phase 2: Execution ---
     
     const expertProfiles = experts.map(e => `- ${e.name} (${e.title}): ${e.reason}. Speaking Style: ${e.style}`).join("\n");
     
@@ -138,7 +118,7 @@ export class IntentCoTStrategy implements DebateStrategy {
         return `${h.expertName}: ${h.content}`;
     }).join("\n");
 
-    // Constructing the Director's Note to inject into the model
+    // Constructing the Director's Note
     let directorNote = "";
     if (plan) {
       directorNote = `
@@ -151,27 +131,7 @@ export class IntentCoTStrategy implements DebateStrategy {
       `;
     }
 
-    const systemInstruction = `
-      You are simulating a deep roundtable discussion.
-      
-      Participants:
-      1. User (User): Proposed an idea.
-      2. Expert Panel:
-      ${expertProfiles}
-
-      Instructions:
-      1. You do not need to act as a "host", strictly roleplay these specific experts.
-      2. **Follow the Director's Notes**: I will provide a hidden "Director's Note" below. You MUST follow its specific instructions on *who* speaks and *what* angle they take.
-      3. **Style Mimicry**: Crucial. Must match the persona.
-      4. **Language**: The entire conversation must be conducted in ${language} language.
-      5. **Strict Formatting**:
-         Use Markdown.
-         Before each expert speaks, you **MUST** start with "**Expert Name**: " (Note the bold and colon).
-         Example:
-         **Kevin Kelly**: I believe...
-      
-      Context: The user has just said something or the conversation is ongoing.
-    `;
+    const systemInstruction = PROMPTS.debate_system_instruction_v2_directed(expertProfiles, language);
 
     const fullPrompt = `
       Conversation History:
@@ -185,7 +145,7 @@ export class IntentCoTStrategy implements DebateStrategy {
     `;
 
     const config = {
-      model: this.config.model, // Using Pro model for execution
+      model: this.config.executionModel, // Dynamic model from config
       contents: fullPrompt,
       config: {
         systemInstruction: systemInstruction,
@@ -203,7 +163,7 @@ export class IntentCoTStrategy implements DebateStrategy {
       
       debugLogger.log({
         action: actionName,
-        context: { role: 'actor', model: this.config.model },
+        context: { role: 'actor', model: this.config.executionModel, promptVersion: PROMPT_VERSION },
         input: config,
         output: responseText,
         latencyMs: latency
@@ -215,7 +175,7 @@ export class IntentCoTStrategy implements DebateStrategy {
       debugLogger.log({
         action: actionName,
         level: 'ERROR',
-        context: { role: 'actor', model: this.config.model },
+        context: { role: 'actor', model: this.config.executionModel, promptVersion: PROMPT_VERSION },
         input: config,
         latencyMs: latency,
         error: error
