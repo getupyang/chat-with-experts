@@ -61,14 +61,28 @@ export class LegacyStrategy implements DebateStrategy {
       }, actionName);
       
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
+      
+      debugLogger.log({
+        action: actionName,
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        output: responseText,
+        latencyMs: latency
+      });
 
       const jsonStr = responseText || "[]";
       return JSON.parse(jsonStr) as Expert[];
 
     } catch (error) {
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(error) }, latency);
+      debugLogger.log({
+        action: actionName,
+        level: 'ERROR',
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        latencyMs: latency,
+        error: error
+      });
       console.error("Failed to fetch experts:", error);
       throw error;
     }
@@ -125,14 +139,28 @@ export class LegacyStrategy implements DebateStrategy {
       }, actionName);
       
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
+      
+      debugLogger.log({
+        action: actionName,
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        output: responseText,
+        latencyMs: latency
+      });
 
       const jsonStr = responseText || "{}";
       return JSON.parse(jsonStr) as Expert;
 
     } catch (error) {
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(error) }, latency);
+      debugLogger.log({
+        action: actionName,
+        level: 'ERROR',
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        latencyMs: latency,
+        error: error
+      });
       console.error("Failed to fetch replacement:", error);
       throw error;
     }
@@ -213,12 +241,26 @@ export class LegacyStrategy implements DebateStrategy {
       }, actionName);
       
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, responseText, latency);
+      
+      debugLogger.log({
+        action: actionName,
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        output: responseText,
+        latencyMs: latency
+      });
 
       return responseText || "";
     } catch (error) {
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, PROMPT_VERSION, config, { error: String(error) }, latency);
+      debugLogger.log({
+        action: actionName,
+        level: 'ERROR',
+        context: { promptVersion: PROMPT_VERSION, model: this.config.model },
+        input: config,
+        latencyMs: latency,
+        error: error
+      });
       console.error("Failed to generate debate:", error);
       throw error;
     }

@@ -91,11 +91,26 @@ export class IntentCoTStrategy implements DebateStrategy {
       }, actionName);
       
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, "v2_cot_director", config, responseText, latency);
+      
+      debugLogger.log({
+        action: actionName,
+        context: { role: 'director', model: this.config.planningModel },
+        input: config,
+        output: responseText,
+        latencyMs: latency
+      });
 
       return JSON.parse(responseText || "{}");
     } catch (error) {
       console.warn("Planning step failed, falling back to empty plan", error);
+      debugLogger.log({
+        action: actionName,
+        level: 'WARN',
+        context: { role: 'director', model: this.config.planningModel },
+        input: config,
+        latencyMs: Date.now() - startTime,
+        error: error
+      });
       return null;
     }
   }
@@ -111,9 +126,7 @@ export class IntentCoTStrategy implements DebateStrategy {
     
     // --- Phase 1: Planning (The "Thought" Process) ---
     let plan = null;
-    // Only run CoT if there is history (not the first turn), or always if desired.
-    // For first turn, "Introduction" is usually standard, but CoT can still help align tone.
-    // Let's run it always for consistency.
+    // Always run CoT
     plan = await this.analyzeIntentAndPlan(topic, experts, history, language);
 
     // --- Phase 2: Execution (The "Acting" Process) ---
@@ -187,12 +200,26 @@ export class IntentCoTStrategy implements DebateStrategy {
       }, actionName);
       
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, "v2_cot_execution", config, responseText, latency);
+      
+      debugLogger.log({
+        action: actionName,
+        context: { role: 'actor', model: this.config.model },
+        input: config,
+        output: responseText,
+        latencyMs: latency
+      });
 
       return responseText || "";
     } catch (error) {
       const latency = Date.now() - startTime;
-      debugLogger.log(actionName, "v2_cot_execution", config, { error: String(error) }, latency);
+      debugLogger.log({
+        action: actionName,
+        level: 'ERROR',
+        context: { role: 'actor', model: this.config.model },
+        input: config,
+        latencyMs: latency,
+        error: error
+      });
       
       console.error("Failed to generate debate v2:", error);
       throw error;

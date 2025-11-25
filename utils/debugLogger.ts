@@ -1,19 +1,47 @@
 
+
 export interface LogEntry {
   id: string;
   timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR';
   action: string;
-  promptVersion: string;
-  payload: any;
-  response: any;
+  
+  // Metadata
+  context?: {
+    promptVersion?: string;
+    model?: string;
+    networkStatus?: string;
+    [key: string]: any;
+  };
+
+  // Data
+  input?: any;
+  output?: any;
+  
+  // Performance & Errors
   latencyMs: number;
+  error?: {
+    message: string;
+    stack?: string;
+    type?: string;
+  };
+}
+
+export interface LogParams {
+  action: string;
+  level?: 'INFO' | 'WARN' | 'ERROR';
+  context?: Record<string, any>;
+  input?: any;
+  output?: any;
+  latencyMs?: number;
+  error?: any;
 }
 
 class DebugLogger {
   private logs: LogEntry[] = [];
   private isEnabled: boolean = false;
-  private readonly STORAGE_KEY = 'debug_flight_recorder';
-  private readonly MAX_LOGS = 50; // Limit to prevent localStorage overflow
+  private readonly STORAGE_KEY = 'debug_flight_recorder_v2';
+  private readonly MAX_LOGS = 100;
 
   constructor() {
     try {
@@ -34,24 +62,37 @@ class DebugLogger {
     return this.isEnabled;
   }
 
-  log(action: string, promptVersion: string, payload: any, response: any, latencyMs: number) {
+  log(params: LogParams) {
+    // Always log critical errors even if debug is off, but don't persist unless enabled
+    // Actually, for this "Flight Recorder" feature, we probably want to capture everything in memory
+    // but only persist/export if enabled. 
+    // For now, let's stick to the "enabled" flag to avoid overhead.
     if (!this.isEnabled) return;
 
     const entry: LogEntry = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
       timestamp: new Date().toISOString(),
-      action,
-      promptVersion,
-      payload, // This contains the runtime constructed prompt
-      response,
-      latencyMs
+      level: params.level || (params.error ? 'ERROR' : 'INFO'),
+      action: params.action,
+      context: {
+        networkStatus: navigator.onLine ? 'online' : 'offline',
+        userAgent: navigator.userAgent,
+        ...params.context
+      },
+      input: params.input,
+      output: params.output,
+      latencyMs: params.latencyMs || 0,
+      error: params.error ? {
+        message: params.error.message || String(params.error),
+        stack: params.error.stack,
+        type: params.error.name
+      } : undefined
     };
 
-    this.logs.push(entry);
+    this.logs.unshift(entry); // Add to beginning (newest first)
 
-    // Keep only last N logs
     if (this.logs.length > this.MAX_LOGS) {
-      this.logs = this.logs.slice(this.logs.length - this.MAX_LOGS);
+      this.logs = this.logs.slice(0, this.MAX_LOGS);
     }
 
     this.persist();
@@ -61,7 +102,7 @@ class DebugLogger {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.logs));
     } catch (e) {
-      console.error("Failed to save debug logs to localStorage", e);
+      // Ignore storage errors
     }
   }
 
@@ -80,9 +121,13 @@ class DebugLogger {
       return;
     }
 
+    // @ts-ignore
+    const envMode = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env.MODE : 'unknown';
+
     const exportData = {
       exportedAt: new Date().toISOString(),
-      appVersion: "1.0.0",
+      appVersion: "1.0.0", // Todo: sync with package version
+      environment: envMode,
       totalLogs: this.logs.length,
       logs: this.logs
     };
@@ -92,7 +137,7 @@ class DebugLogger {
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chat_experts_debug_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `chat_experts_debug_${new Date().toISOString().slice(0,16).replace(/:/g, '-')}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

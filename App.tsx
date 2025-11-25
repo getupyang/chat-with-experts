@@ -7,6 +7,7 @@ import { ChatBubble } from './components/ChatBubble';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { SettingsModal } from './components/SettingsModal';
 import { fetchExperts, fetchDebateResponse, fetchReplacementExpert } from './services/geminiService';
+import { validateConnectivity, classifyError } from './services/geminiClient';
 import { ChatSession, Message, Language } from './types';
 import { getTranslation } from './utils/localization';
 import { debugLogger } from './utils/debugLogger';
@@ -43,12 +44,14 @@ export default function App() {
   const t = getTranslation(language);
   
   // Check if the CURRENT view is loading (for UI blocking)
-  // CRITICAL FIX: Ensure loadingChatId is NOT null before comparing
   const isCurrentChatLoading = loadingChatId !== null && loadingChatId === currentChatId;
 
   // Initialize
   useEffect(() => {
-    // Load Language
+    // 1. Run Diagnostics (Silent check)
+    validateConnectivity();
+
+    // 2. Load Language
     const savedLang = localStorage.getItem('app_language') as Language;
     if (savedLang) {
       setLanguage(savedLang);
@@ -56,13 +59,13 @@ export default function App() {
       setLanguage(getSystemLanguage());
     }
 
-    // Load Debug Mode Preference
+    // 3. Load Debug Mode Preference
     const debugPref = localStorage.getItem('debug_mode_enabled');
     if (debugPref === 'true') {
       debugLogger.setEnabled(true);
     }
 
-    // Load Chats
+    // 4. Load Chats
     try {
       const saved = localStorage.getItem('debate_chats_v2');
       if (saved) setChats(JSON.parse(saved));
@@ -70,7 +73,7 @@ export default function App() {
       console.error("Failed to load history", e);
     }
     
-    // Auto close sidebar on mobile
+    // 5. Auto close sidebar on mobile
     if (window.innerWidth < 768) {
         setSidebarOpen(false);
     }
@@ -135,7 +138,8 @@ export default function App() {
 
     } catch (error) {
       console.error("Failed to replace expert", error);
-      alert("Could not find a replacement expert right now.");
+      const errInfo = classifyError(error);
+      alert(`Error replacing expert: ${errInfo.message}`);
     } finally {
       setReplacingExpertName(null);
     }
@@ -196,8 +200,16 @@ export default function App() {
 
     } catch (err) {
       console.error(err);
-      // Ideally show a toast or error message in UI
-      alert("Failed to connect to the network. Please try again.");
+      
+      const errorInfo = classifyError(err);
+      
+      // If user has debug enabled, guide them there. Otherwise show specific alert.
+      if (debugLogger.isEnabledStatus()) {
+        alert(`${errorInfo.message}\n\nCheck 'Settings > Developer Mode > System Logs' for technical details.`);
+      } else {
+        alert(errorInfo.message);
+      }
+      
     } finally {
       setLoadingChatId(null);
       setLoadingMessage("");
