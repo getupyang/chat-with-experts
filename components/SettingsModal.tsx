@@ -13,15 +13,18 @@ interface SettingsModalProps {
   onClearHistory: () => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  currentLanguage, 
+export const SettingsModal: React.FC<SettingsModalProps> = ({
+  isOpen,
+  onClose,
+  currentLanguage,
   onLanguageChange,
   onClearHistory
 }) => {
   const [activeTab, setActiveTab] = useState<'general' | 'logs'>('general');
   const [debugEnabled, setDebugEnabled] = useState(debugLogger.isEnabledStatus());
+  const [developerModeEnabled, setDeveloperModeEnabled] = useState(
+    localStorage.getItem('developer_mode_enabled') === 'true'
+  );
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
@@ -60,6 +63,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setDebugEnabled(newState);
     debugLogger.setEnabled(newState);
     localStorage.setItem('debug_mode_enabled', String(newState));
+  };
+
+  const handleToggleDeveloperMode = () => {
+    const newState = !developerModeEnabled;
+    setDeveloperModeEnabled(newState);
+    localStorage.setItem('developer_mode_enabled', String(newState));
   };
 
   const handleExportLogs = () => {
@@ -185,25 +194,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                    <span>{t.devMode}</span>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">{t.enableDebugLog}</span>
-                    <button 
-                      onClick={handleToggleDebug}
-                      className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-                        debugEnabled ? 'bg-indigo-600' : 'bg-gray-300'
-                      }`}
-                    >
-                      <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-                        debugEnabled ? 'translate-x-5' : ''
-                      }`} />
-                    </button>
+
+                  {/* Developer Mode Toggle */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">I'm a Developer (测试模式)</span>
+                      <button
+                        onClick={handleToggleDeveloperMode}
+                        className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                          developerModeEnabled ? 'bg-orange-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                          developerModeEnabled ? 'translate-x-5' : ''
+                        }`} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 leading-snug mt-2">
+                      开启后，你的对话数据<strong>只保存在本地</strong>，不会上传到服务器。适合开发者自己测试时使用。
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-400 leading-snug">
-                    {t.debugLogDesc}
-                  </p>
-                  
+
+                  <div className="border-t border-gray-200"></div>
+
+                  {/* Debug Log Toggle */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">{t.enableDebugLog}</span>
+                      <button
+                        onClick={handleToggleDebug}
+                        className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                          debugEnabled ? 'bg-indigo-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
+                          debugEnabled ? 'translate-x-5' : ''
+                        }`} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400 leading-snug mt-2">
+                      {t.debugLogDesc}
+                    </p>
+                  </div>
+
                   {debugEnabled && (
-                    <button 
+                    <button
                       onClick={handleExportLogs}
                       className="w-full py-2.5 bg-white border border-indigo-200 text-indigo-600 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
                     >
