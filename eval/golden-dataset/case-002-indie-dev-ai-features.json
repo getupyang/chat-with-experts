@@ -1,0 +1,94 @@
+{
+  "id": "case-002",
+  "version": "v0.2.4",
+  "createdAt": "2025-11-26T04:00:00.000Z",
+  "description": "独立开发者纠结是否给产品加AI功能 - 典型的Context-Aware + Peer Validation场景",
+
+  "input": {
+    "userQuery": "我是一个独立开发者，做了一个小众的项目管理工具，目前有500个付费用户，MRR $2000。最近很多用户问我会不会加AI功能（自动总结会议、生成任务）。我很纠结：1）感觉不加AI会被淘汰 2）但我一个人，加AI功能至少要2-3个月，会影响其他roadmap 3）不确定用户是真需求还是跟风 4）担心AI成本会吃掉利润。我该怎么决策？是立刻all-in AI，还是先观望？",
+    "userContext": {
+      "role": "独立开发者 (Solo indie hacker)",
+      "resourceLevel": "资源极其有限 - 一人团队，$2000 MRR",
+      "expertiseLevel": "产品和开发都会，但对AI集成经验少",
+      "emotionalState": "FOMO焦虑 - 怕错过AI浪潮被淘汰",
+      "expectationType": "需要peer validation（其他indie dev怎么做的）+ 具体trade-off分析（做vs不做的利弊），而非AI技术科普"
+    }
+  },
+
+  "expected": {
+    "expertSelection": {
+      "mustInclude": [
+        "成功的独立开发者 (如 Pieter Levels, Daniel Vassallo, Arvid Kahl)",
+        "小团队AI产品实践者 (非大公司AI科学家)"
+      ],
+      "mustNotInclude": [
+        "Sam Altman或OpenAI高管 (context mismatch - 大公司视角)",
+        "AI研究科学家 (会讲技术原理，但不理解indie困境)",
+        "VC投资人 (会push激进策略)"
+      ],
+      "minExperts": 2,
+      "maxExperts": 3
+    },
+
+    "responseQuality": {
+      "mustAnswer": [
+        "其他indie dev在类似处境下的选择（数据/案例）",
+        "具体trade-off：做AI的opportunity cost是什么",
+        "如何低成本验证AI需求是真是假（在投入2-3个月前）",
+        "如果做，最小MVP是什么（不是完整AI roadmap）"
+      ],
+      "mustAvoid": [
+        "泛泛而谈'AI是趋势'（用户已经知道）",
+        "推荐复杂AI架构（RAG、fine-tuning等，indie dev做不了）",
+        "大公司案例（Notion AI、Slack AI等，context不符）",
+        "让用户'both'（又要AI又要其他功能 - 不现实）"
+      ],
+      "actionability": {
+        "required": true,
+        "minSteps": 3,
+        "timeframe": "下周可以开始验证，2周内做决策"
+      }
+    },
+
+    "expertDivision": {
+      "noRepetition": true,
+      "mustHaveDifferentAngles": true
+    }
+  },
+
+  "criteria": {
+    "relevance": {
+      "weight": 0.15,
+      "description": "是否理解indie dev的真实困境（资源、FOMO、opportunity cost）"
+    },
+    "actionability": {
+      "weight": 0.35,
+      "description": "是否给出可执行的验证方案和决策框架（不是空谈趋势）"
+    },
+    "expertMatch": {
+      "weight": 0.25,
+      "description": "专家是否是indie dev peer（不是大公司高管或学者）"
+    },
+    "expertDivision": {
+      "weight": 0.1,
+      "description": "专家是否有不同角度（如保守派vs激进派）"
+    },
+    "conciseness": {
+      "weight": 0.05,
+      "description": "直击要害，不科普AI基础知识"
+    },
+    "novelty": {
+      "weight": 0.1,
+      "description": "是否有反直觉insights（如'不做AI也能活得好'的案例）"
+    }
+  },
+
+  "metadata": {
+    "category": "独立开发者决策",
+    "difficulty": "medium",
+    "tags": ["indie hacker", "AI集成", "FOMO", "trade-off", "资源限制"],
+    "notes": "这是典型的'通用AI会失败'场景 - 通用AI会给标准建议（AI是趋势，应该做），但不理解indie的opportunity cost和资源限制。我们的价值在于提供peer validation和具体权衡。",
+    "whyGenericAIFails": "通用AI会给'AI是未来，你应该投入'的标准答案，但不会考虑：1）用户只有一人，2-3个月opportunity cost巨大 2）$2000 MRR规模下AI成本可能不划算 3）需要先验证需求真伪的低成本方法",
+    "ourAdvantage": "匹配Pieter Levels这类indie dev，他们会说'我也遇到过，我是这样验证的'，给出peer proof和具体trade-off框架"
+  }
+}

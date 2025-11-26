@@ -1,0 +1,94 @@
+{
+  "id": "case-004",
+  "version": "v0.2.4",
+  "createdAt": "2025-11-26T04:00:00.000Z",
+  "description": "开发者转PM职业转型 - 典型的Peer Validation + 情感支持场景",
+
+  "input": {
+    "userQuery": "我做了5年后端开发（Java/Go），最近越来越觉得自己更喜欢思考产品方向和用户需求，而不是天天写代码。公司有个PM职位空缺，我在考虑要不要内部转岗。但我很纠结：1）技术人转PM会不会不受尊重？听说很多工程师看不起PM 2）我没有MBA，也没做过PM，能做好吗？ 3）PM的职业发展路径是什么？会不会到35岁更焦虑 4）工资会降吗？我现在年薪50万 5）如果做了发现不喜欢，还能转回来吗？想听听过来人的真实经历。",
+    "userContext": {
+      "role": "5年经验后端工程师，大厂（年薪50万说明tier 1公司）",
+      "resourceLevel": "不缺钱，但在意职业发展和工作满足感",
+      "expertiseLevel": "技术扎实，但产品思维未验证",
+      "emotionalState": "焦虑+自我怀疑 - 担心转型失败、后悔、被看不起",
+      "expectationType": "需要过来人真实经历（成功+失败案例）、情感支持、具体准备建议，而非PM职责科普"
+    }
+  },
+
+  "expected": {
+    "expertSelection": {
+      "mustInclude": [
+        "从工程师成功转型PM的人（如Ken Norton, Shreyas Doshi）",
+        "技术背景的资深PM（能说技术人做PM的优劣势）"
+      ],
+      "mustNotInclude": [
+        "传统MBA出身的PM（经历不可复制）",
+        "职业规划师/coach（泛泛而谈）",
+        "一直做技术的工程师（没有转型经验）"
+      ],
+      "minExperts": 2,
+      "maxExperts": 3
+    },
+
+    "responseQuality": {
+      "mustAnswer": [
+        "技术人做PM的独特优势和劣势（真实案例）",
+        "如何在转型前验证自己是否适合（低成本试错）",
+        "转型后最大的挑战是什么（不是想象中的）",
+        "具体准备：接下来1-2个月可以做什么来验证/准备"
+      ],
+      "mustAvoid": [
+        "PM职责科普（用户已经知道）",
+        "鸡汤（'follow your passion'）",
+        "只讲成功故事不讲坑",
+        "笼统建议（'多看产品书' - 看哪本？怎么看？）"
+      ],
+      "actionability": {
+        "required": true,
+        "minSteps": 3,
+        "timeframe": "1-2个月内验证是否真的适合，再做决定"
+      }
+    },
+
+    "expertDivision": {
+      "noRepetition": true,
+      "mustHaveDifferentAngles": true
+    }
+  },
+
+  "criteria": {
+    "relevance": {
+      "weight": 0.15,
+      "description": "是否理解用户的核心焦虑（不被尊重、后悔、能力不足）"
+    },
+    "actionability": {
+      "weight": 0.3,
+      "description": "是否给出验证方法和具体准备步骤（而非直接说转or不转）"
+    },
+    "expertMatch": {
+      "weight": 0.25,
+      "description": "专家必须是工程师转PM的过来人（不是传统PM）"
+    },
+    "expertDivision": {
+      "weight": 0.1,
+      "description": "可以有不同观点（如'我转了很好' vs '我转了后悔'）"
+    },
+    "conciseness": {
+      "weight": 0.05,
+      "description": "不科普PM基础知识"
+    },
+    "novelty": {
+      "weight": 0.15,
+      "description": "是否有反直觉insights（如'工程师做PM最大的坑不是技术，而是X'）"
+    }
+  },
+
+  "metadata": {
+    "category": "职业发展",
+    "difficulty": "medium",
+    "tags": ["职业转型", "PM", "工程师", "peer validation", "情感支持"],
+    "notes": "这个case的关键是：用户不是要PM职责科普，而是要peer validation（别人怎么做的）和情感支持（我这样想正常吗）。",
+    "whyGenericAIFails": "通用AI会：1）科普PM是做什么的（用户已知） 2）列举pros/cons但没有真实案例 3）给建议但缺乏'我也经历过'的peer credibility 4）不能回答'工程师看不起PM'这种情感焦虑（需要过来人说'我也担心过，后来...'）",
+    "ourAdvantage": "匹配Ken Norton这类工程师转PM的成功案例，他们会分享：1）真实转型经历和坑 2）具体验证方法（如先做PM实习项目） 3）情感共鸣（'我当年也怕被看不起'）4）可能有不同声音（有人说转得好，有人说后悔了）"
+  }
+}

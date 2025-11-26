@@ -1,0 +1,95 @@
+{
+  "id": "case-005",
+  "version": "v0.2.4",
+  "createdAt": "2025-11-26T04:00:00.000Z",
+  "description": "早期创始人验证PMF - 典型的Cross-domain + Actionability场景",
+
+  "input": {
+    "userQuery": "我做了一个给设计师用的AI工具，上线3个月，有200个注册用户，但只有5个付费（转化率2.5%）。我不确定：1）这算找到PMF了吗？还是只是有一些early adopters？ 2）我应该继续优化产品，还是先做增长把用户量做大？ 3）怎么判断用户是真爱这个产品，还是只是尝鲜？ 4）我的runway还有6个月，应该专注提高转化率，还是快速试错找新方向？感觉每个人给我的建议都不一样，很迷茫。",
+    "userContext": {
+      "role": "早期创始人（技术背景，第一次创业）",
+      "resourceLevel": "资源紧张 - 6个月runway，小团队或solo",
+      "expertiseLevel": "会做产品，但对PMF验证、增长策略缺乏经验",
+      "emotionalState": "焦虑+迷茫 - 时间压力大，不知道应该focus在哪里",
+      "expectationType": "需要明确的判断标准（什么是PMF）+ 具体action plan（接下来6个月做什么），而非创业鸡汤"
+    }
+  },
+
+  "expected": {
+    "expertSelection": {
+      "mustInclude": [
+        "有早期PMF验证经验的创始人（0-1阶段，如Rahul Vohra/Superhuman）",
+        "增长专家/产品专家（懂PMF指标和验证方法）",
+        "可选：设计工具领域的创业者（domain expertise）"
+      ],
+      "mustNotInclude": [
+        "VC投资人（他们的激励机制是快速增长，不一定符合创始人利益）",
+        "大公司PM（不懂早期验证PMF的困境）",
+        "纯理论的精益创业导师（会讲框架但没实战）"
+      ],
+      "minExperts": 2,
+      "maxExperts": 4
+    },
+
+    "responseQuality": {
+      "mustAnswer": [
+        "2.5%转化率、200用户是否算PMF？给判断标准（不是拍脑袋）",
+        "如何定量+定性验证用户是真需求（具体方法，如cohort retention、用户访谈问什么）",
+        "6个月runway下的优先级：应该focus产品还是增长？给决策框架",
+        "接下来4周的具体action plan（做什么、验证什么、什么指标说明成功/失败）"
+      ],
+      "mustAvoid": [
+        "PMF定义科普（用户已经知道概念）",
+        "泛泛而谈'要跟用户聊'（怎么聊？问什么？）",
+        "同时建议做产品又做增长（资源不够，必须二选一）",
+        "鸡汤式鼓励（'坚持就会成功'）"
+      ],
+      "actionability": {
+        "required": true,
+        "minSteps": 5,
+        "timeframe": "4周内验证PMF，基于结果决定接下来方向"
+      }
+    },
+
+    "expertDivision": {
+      "noRepetition": true,
+      "mustHaveDifferentAngles": true
+    }
+  },
+
+  "criteria": {
+    "relevance": {
+      "weight": 0.2,
+      "description": "是否针对早期、资源紧张、6个月runway这个具体处境"
+    },
+    "actionability": {
+      "weight": 0.35,
+      "description": "必须给出4周验证plan和明确决策框架（什么情况pivot，什么情况继续）"
+    },
+    "expertMatch": {
+      "weight": 0.2,
+      "description": "专家是否有早期验证PMF经验（不是增长期经验）"
+    },
+    "expertDivision": {
+      "weight": 0.1,
+      "description": "可能有不同策略：产品派（先做retention）vs 增长派（先做量）"
+    },
+    "conciseness": {
+      "weight": 0.05,
+      "description": "不讲精益创业101"
+    },
+    "novelty": {
+      "weight": 0.1,
+      "description": "是否有具体指标和案例（如'Superhuman用40% very disappointed作为PMF标准'）"
+    }
+  },
+
+  "metadata": {
+    "category": "创业早期",
+    "difficulty": "hard",
+    "tags": ["PMF", "早期创业", "增长", "资源限制", "决策框架"],
+    "notes": "这是跨领域问题（产品+增长+用户研究），且需要高度actionable的建议。通用AI会讲PMF理论但不会给6个月runway下的具体策略。",
+    "whyGenericAIFails": "通用AI会：1）科普PMF定义（用户知道） 2）列举多种验证方法但不说哪个优先 3）给的建议resource-agnostic（不考虑6个月runway的紧迫性） 4）不会给'如果4周后指标是X就pivot，是Y就继续'这种明确框架",
+    "ourAdvantage": "多专家可以cover产品+增长+用户研究，且可能有争论：产品派说'先做retention到40%'，增长派说'先做量找更多信号'。关键是给出在6个月限制下的优先级和验证框架。"
+  }
+}
