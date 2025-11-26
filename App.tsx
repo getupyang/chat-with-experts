@@ -11,6 +11,7 @@ import { validateConnectivity, classifyError } from './services/geminiClient';
 import { ChatSession, Message, Language } from './types';
 import { getTranslation } from './utils/localization';
 import { debugLogger } from './utils/debugLogger';
+import { conversationLogger } from './utils/conversationLogger';
 
 const getSystemLanguage = (): Language => {
   const lang = navigator.language.toLowerCase();
@@ -149,8 +150,10 @@ export default function App() {
     if (!textInput.trim() || isCurrentChatLoading) return;
 
     const timestamp = Date.now();
+    const conversationStartTime = Date.now();
     let chatId = currentChatId;
     let chat = activeChat;
+    let conversationRecordId: string | null = null;
 
     // Initialize new chat if needed
     if (!chatId || !chat) {
@@ -158,13 +161,16 @@ export default function App() {
         id: timestamp.toString(),
         topic: textInput,
         experts: [],
-        messages: [], 
+        messages: [],
         createdAt: new Date().toISOString()
       };
       setChats(prev => [newChat, ...prev]);
       setCurrentChatId(newChat.id);
       chatId = newChat.id;
       chat = newChat;
+
+      // 📊 Start conversation logging (for new conversations only)
+      conversationRecordId = conversationLogger.startConversation(textInput, language);
     }
 
     // Set loading for THIS chat ID
@@ -172,51 +178,68 @@ export default function App() {
 
     // Add user message
     const userMsg: Message = { id: `msg-${Date.now()}`, role: 'user', content: textInput, timestamp };
-    
+
     setChats(prev => prev.map(c => c.id === chatId ? { ...c, messages: [...c.messages, userMsg] } : c));
     setInput("");
 
     try {
       // Step 1: Fetch Experts if not exists
       let currentExperts = chat.experts;
+      let expertSelectionTime = 0;
+
       if (currentExperts.length === 0) {
         setLoadingMessage(t.loadingExperts);
-        
+
+        const expertStartTime = Date.now();
         currentExperts = await fetchExperts(textInput, language);
-        
+        expertSelectionTime = Date.now() - expertStartTime;
+
         // Update chat with experts
         setChats(prev => prev.map(c => c.id === chatId ? { ...c, experts: currentExperts, topic: textInput } : c));
+
+        // 📊 Log expert selection
+        if (conversationRecordId) {
+          conversationLogger.logExpertSelection(conversationRecordId, currentExperts, expertSelectionTime);
+        }
       }
 
       // Step 2: Generate Debate
       setLoadingMessage(t.generatingDebate);
-      
+
       // Get latest history including the new user message
       const updatedHistory = [...(chat.messages || []), userMsg];
-      
+
+      const debateStartTime = Date.now();
       const rawResponse = await fetchDebateResponse(textInput, currentExperts, updatedHistory, language);
-      
-      processAndAddResponse(chatId, rawResponse);
+      const debateTime = Date.now() - debateStartTime;
+
+      processAndAddResponse(chatId, rawResponse, conversationRecordId);
+
+      // 📊 Complete conversation logging
+      if (conversationRecordId) {
+        const totalDuration = Date.now() - conversationStartTime;
+        conversationLogger.completeConversation(conversationRecordId, totalDuration, debateTime);
+      }
 
     } catch (err) {
       console.error(err);
-      
+
       const errorInfo = classifyError(err);
-      
+
       // If user has debug enabled, guide them there. Otherwise show specific alert.
       if (debugLogger.isEnabledStatus()) {
         alert(`${errorInfo.message}\n\nCheck 'Settings > Developer Mode > System Logs' for technical details.`);
       } else {
         alert(errorInfo.message);
       }
-      
+
     } finally {
       setLoadingChatId(null);
       setLoadingMessage("");
     }
   };
 
-  const processAndAddResponse = (chatId: string, rawText: string) => {
+  const processAndAddResponse = (chatId: string, rawText: string, conversationRecordId?: string | null) => {
     const lines = rawText.split('\n');
     const newMessages: Message[] = [];
     let currentSpeaker: string | null = null;
@@ -224,13 +247,19 @@ export default function App() {
 
     const flushBuffer = () => {
       if (currentBuffer.trim()) {
-        newMessages.push({
+        const message: Message = {
           id: `msg-${Date.now()}-${Math.random()}`,
           role: 'expert',
           expertName: currentSpeaker || "Expert Panel",
           content: currentBuffer.trim(),
           timestamp: Date.now()
-        });
+        };
+        newMessages.push(message);
+
+        // 📊 Log each debate message
+        if (conversationRecordId) {
+          conversationLogger.logDebateMessage(conversationRecordId, message);
+        }
       }
       currentBuffer = "";
     };
