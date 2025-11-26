@@ -210,9 +210,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         }`} />
                       </button>
                     </div>
-                    <p className="text-xs text-gray-400 leading-snug mt-2">
-                      开启后，你的对话数据<strong>只保存在本地</strong>，不会上传到服务器。适合开发者自己测试时使用。
-                    </p>
                   </div>
 
                   <div className="border-t border-gray-200"></div>

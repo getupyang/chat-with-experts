@@ -409,8 +409,8 @@ export default function App() {
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="p-4 md:p-6 bg-white border-t border-gray-200 z-30 flex-shrink-0">
+        {/* Input Area - Mobile optimized with safe-area-inset */}
+        <div className="p-4 md:p-6 bg-white border-t border-gray-200 z-30 flex-shrink-0" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
           <div className="max-w-4xl mx-auto relative group">
             <textarea
               value={input}
@@ -419,15 +419,15 @@ export default function App() {
               placeholder={activeChat ? t.inputPlaceholder : t.newTopicPlaceholder}
               className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all resize-none shadow-sm text-sm md:text-base disabled:opacity-60 disabled:cursor-not-allowed"
               rows={1}
-              style={{ minHeight: '60px' }} 
+              style={{ minHeight: '60px' }}
               disabled={isCurrentChatLoading}
             />
-            <button 
+            <button
               onClick={() => handleSendMessage(input)}
               disabled={!input.trim() || isCurrentChatLoading}
               className={`absolute right-3 bottom-3 p-2.5 rounded-xl transition-all duration-200 ${
                 input.trim() && !isCurrentChatLoading
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg hover:-translate-y-0.5' 
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md hover:shadow-lg hover:-translate-y-0.5'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -435,7 +435,7 @@ export default function App() {
             </button>
           </div>
           <p className="text-center text-[10px] text-gray-400 mt-3 font-medium tracking-wide">
-            {t.disclaimer}
+            {t.disclaimer} · 我们记录对话以改进产品
           </p>
         </div>
 

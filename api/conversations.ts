@@ -52,7 +52,7 @@ export default async function handler(
         ) VALUES (
           ${conversation.id},
           ${JSON.stringify(conversation)}::jsonb,
-          ${new Date(conversation.createdAt)},
+          ${conversation.createdAt},
           ${conversation.userQuery},
           ${conversation.selectedExperts?.length || 0},
           ${conversation.metadata?.language || 'unknown'},
