@@ -126,7 +126,7 @@ class DebugLogger {
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      appVersion: "1.0.0", // Todo: sync with package version
+      appVersion: "0.2.4", // v0.2.4: Context-aware CoT with deep intent understanding
       environment: envMode,
       totalLogs: this.logs.length,
       logs: this.logs

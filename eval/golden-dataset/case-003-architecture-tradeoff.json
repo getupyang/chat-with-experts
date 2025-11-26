@@ -1,0 +1,95 @@
+{
+  "id": "case-003",
+  "version": "v0.2.4",
+  "createdAt": "2025-11-26T04:00:00.000Z",
+  "description": "技术架构选择：微服务vs单体 - 典型的Multi-perspective Trade-off场景",
+
+  "input": {
+    "userQuery": "我们是一个20人的技术团队，做B2B SaaS产品，目前用的是Rails单体应用。随着业务增长，代码库越来越大（30万行代码），部署变慢，团队协作也有冲突。CTO建议迁移到微服务架构，但我担心：1）微服务会不会over-engineering？我们还没到Google的规模 2）迁移成本多大？会不会影响业务 3）团队没有微服务经验，坑会很多 4）听说微服务运维复杂度高。但如果不迁移，现在的问题会越来越严重。我该怎么决策？",
+    "userContext": {
+      "role": "技术负责人 / Tech Lead",
+      "resourceLevel": "20人团队，B2B SaaS，有一定资源但不是大厂",
+      "expertiseLevel": "对单体架构熟悉，微服务只有理论知识",
+      "emotionalState": "纠结 - 既担心不动会被技术债压垮，又怕微服务是过度设计",
+      "expectationType": "需要多角度权衡（性能、团队、业务风险），以及具体判断标准（什么时候该迁移）"
+    }
+  },
+
+  "expected": {
+    "expertSelection": {
+      "mustInclude": [
+        "有微服务实战经验的架构师（经历过迁移的痛）",
+        "务实的技术leader（不追求技术时髦，关注ROI）",
+        "可选：运维/DevOps专家（微服务对运维影响大）"
+      ],
+      "mustNotInclude": [
+        "纯理论派（只讲DDD、CQRS概念）",
+        "大厂架构师（Netflix/Amazon规模不适用）",
+        "咨询公司顾问（倾向于推微服务因为复杂=贵）"
+      ],
+      "minExperts": 2,
+      "maxExperts": 4
+    },
+
+    "responseQuality": {
+      "mustAnswer": [
+        "20人团队、30万行代码是否到了'必须'微服务的临界点（给判断标准）",
+        "如果迁移，应该是big bang还是渐进式？具体策略是什么",
+        "不迁移的话，有哪些'中间方案'可以缓解当前痛点（如模块化单体）",
+        "微服务的隐性成本：运维、监控、调试、团队培训（要量化）"
+      ],
+      "mustAvoid": [
+        "'微服务是趋势'这种空话",
+        "列举微服务优点但不谈trade-off",
+        "技术术语轰炸（service mesh、saga pattern等）不解释何时需要",
+        "所有专家都站一边（要有不同意见）"
+      ],
+      "actionability": {
+        "required": true,
+        "minSteps": 4,
+        "timeframe": "给出决策框架（什么情况选A，什么情况选B）+ 如果做的话，第一步做什么"
+      }
+    },
+
+    "expertDivision": {
+      "noRepetition": true,
+      "mustHaveDifferentAngles": true
+    }
+  },
+
+  "criteria": {
+    "relevance": {
+      "weight": 0.2,
+      "description": "是否针对20人团队、30万行代码这个具体规模，而非泛泛而谈"
+    },
+    "actionability": {
+      "weight": 0.25,
+      "description": "是否给出决策框架和具体迁移策略（如果决定做的话）"
+    },
+    "expertMatch": {
+      "weight": 0.15,
+      "description": "专家是否有中等规模团队经验（不是Netflix也不是5人startup）"
+    },
+    "expertDivision": {
+      "weight": 0.2,
+      "description": "必须有不同立场：保守派（先优化单体）vs 激进派（尽早微服务）"
+    },
+    "conciseness": {
+      "weight": 0.1,
+      "description": "不讲微服务101基础知识"
+    },
+    "novelty": {
+      "weight": 0.1,
+      "description": "是否有反直觉观点（如'模块化单体'、'你可能不需要微服务'）"
+    }
+  },
+
+  "metadata": {
+    "category": "技术架构决策",
+    "difficulty": "hard",
+    "tags": ["微服务", "架构", "trade-off", "技术债", "团队规模"],
+    "notes": "这是经典的trade-off场景，最适合多专家辩论。通用AI倾向于给'it depends'或列举pros/cons但不帮决策。",
+    "whyGenericAIFails": "通用AI会列举微服务优缺点，但：1）不会根据20人规模给具体建议 2）倾向于'技术正确'（微服务）而非'业务正确' 3）不会给渐进式迁移的具体策略 4）不会challenge'是否真的需要微服务'",
+    "ourAdvantage": "2-4个专家会有争论：保守派说'你还不需要，先做模块化'，激进派说'现在不做以后更痛'，用户看到不同风险偏好，根据自己团队情况选择"
+  }
+}

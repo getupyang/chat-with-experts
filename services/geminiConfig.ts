@@ -6,10 +6,11 @@ export const MODELS = {
 } as const;
 
 export const AI_CONFIG = {
-  // Switch this to 'v1_legacy' to rollback immediately
-  // Switch to 'v2_intent_cot' to use the new Chain-of-Thought logic
-  activeStrategyId: "v2_intent_cot", 
-  
+  // V3: Context-Aware CoT - Deep user understanding + context-aware expert selection
+  // V2: Intent-First CoT - Intent analysis + directed responses
+  // V1: Legacy - Direct single-stage responses
+  activeStrategyId: "v3_context_aware_cot",
+
   strategies: {
     "v1_legacy": {
       id: "v1_legacy",
@@ -20,9 +21,15 @@ export const AI_CONFIG = {
       id: "v2_intent_cot",
       // EMERGENCY FIX: Downgrading 'executionModel' from Pro to Flash due to Google API 500/Quota errors.
       // Restore to MODELS.pro when quota allows.
-      executionModel: MODELS.flash, 
-      planningModel: MODELS.flash, 
+      executionModel: MODELS.flash,
+      planningModel: MODELS.flash,
       name: "Intent-First CoT (Flash Optimized)"
+    },
+    "v3_context_aware_cot": {
+      id: "v3_context_aware_cot",
+      executionModel: MODELS.flash,
+      planningModel: MODELS.flash,
+      name: "Context-Aware CoT (v0.2.4)"
     }
   }
 };

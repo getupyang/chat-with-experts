@@ -4,11 +4,13 @@ import { AI_CONFIG } from "./geminiConfig";
 import { DebateStrategy } from "./strategies/types";
 import { LegacyStrategy } from "./strategies/LegacyStrategy";
 import { IntentCoTStrategy } from "./strategies/IntentCoTStrategy";
+import { ContextAwareCoTStrategy } from "./strategies/ContextAwareCoTStrategy";
 
 // --- Strategy Registry ---
 const strategies: Record<string, DebateStrategy> = {
   "v1_legacy": new LegacyStrategy(),
-  "v2_intent_cot": new IntentCoTStrategy()
+  "v2_intent_cot": new IntentCoTStrategy(),
+  "v3_context_aware_cot": new ContextAwareCoTStrategy()
 };
 
 // --- Strategy Resolver ---

@@ -1,0 +1,90 @@
+{
+  "id": "case-001",
+  "version": "v0.2.4",
+  "createdAt": "2025-11-26T03:00:00.000Z",
+  "description": "AI产品经理咨询产品迭代流程，期望获得具体可执行的建议",
+
+  "input": {
+    "userQuery": "我想咨询在llm时期的产品迭代流程。比如说：我发现现在我的模型有很多问题：1）对用户的意图理解不深刻 2）对专家的选择没有明显的分工...（完整query见用户实际测试）",
+    "userContext": {
+      "role": "AI产品经理，创业团队",
+      "resourceLevel": "小团队，资源有限",
+      "expertiseLevel": "有产品思考，但对AI工程实践不够深入",
+      "emotionalState": "焦虑，需要validation和具体行动指南",
+      "expectationType": "具体可执行方法 + 同行验证，而非纯理论"
+    }
+  },
+
+  "expected": {
+    "expertSelection": {
+      "mustInclude": [
+        "有AI产品0-1经验的产品经理（如Lenny Rachitsky）",
+        "有AI工程实践经验的技术专家（如Lilian Weng）"
+      ],
+      "mustNotInclude": [
+        "纯理论学者",
+        "大公司CEO（context mismatch）",
+        "已退休的传奇人物"
+      ],
+      "minExperts": 2,
+      "maxExperts": 4
+    },
+
+    "responseQuality": {
+      "mustAnswer": [
+        "具体选哪个窄场景作为切入点",
+        "接下来1-2周应该做哪3件事",
+        "如何权衡：哪些可以暂时不做（如知识图谱到什么粒度就够了）"
+      ],
+      "mustAvoid": [
+        "纯术语轰炸（如知识图谱、动态技能嵌入）不解释如何落地",
+        "泛泛而谈'窄而深很重要'但不给具体场景",
+        "专家之间重复观点"
+      ],
+      "actionability": {
+        "required": true,
+        "minSteps": 3,
+        "timeframe": "1-2周"
+      }
+    },
+
+    "expertDivision": {
+      "noRepetition": true,
+      "mustHaveDifferentAngles": true
+    }
+  },
+
+  "criteria": {
+    "relevance": {
+      "weight": 0.2,
+      "description": "专家是否针对用户的6个具体问题回答，而非泛泛而谈"
+    },
+    "actionability": {
+      "weight": 0.3,
+      "description": "是否提供了具体的、可执行的下一步行动（本周/下周要做什么）"
+    },
+    "expertMatch": {
+      "weight": 0.15,
+      "description": "专家选择是否匹配用户处境（小团队AI PM）"
+    },
+    "expertDivision": {
+      "weight": 0.15,
+      "description": "专家之间是否有明确分工，无重复"
+    },
+    "conciseness": {
+      "weight": 0.1,
+      "description": "信息密度高，无废话"
+    },
+    "novelty": {
+      "weight": 0.1,
+      "description": "是否有新观点、新角度"
+    }
+  },
+
+  "metadata": {
+    "category": "AI产品管理",
+    "difficulty": "hard",
+    "tags": ["AI PM", "产品迭代", "资源有限", "可执行性"],
+    "notes": "这是用户实际测试的case，评分7分。主要问题：信息密度vs可执行性失衡，专家（尤其Lilian Weng）给了太多理论，没告诉用户'下周具体做什么'"
+  }
+}
