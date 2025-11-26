@@ -285,6 +285,13 @@ class ConversationLogger {
       return;
     }
 
+    // 🔧 检查是否是开发者模式 - 开发者的测试数据不上传
+    const isDeveloperMode = localStorage.getItem('developer_mode_enabled') === 'true';
+    if (isDeveloperMode) {
+      console.log('🔧 Developer mode: Skipping upload (data saved locally only)');
+      return;
+    }
+
     try {
       const response = await fetch(this.UPLOAD_ENDPOINT, {
         method: 'POST',
@@ -301,7 +308,9 @@ class ConversationLogger {
             screenSize: `${window.screen.width}x${window.screen.height}`,
             // 不包含IP、User Agent等隐私信息
           }
-        })
+        }),
+        // 设置10秒超时，避免网络慢影响用户
+        signal: AbortSignal.timeout(10000)
       });
 
       if (!response.ok) {
